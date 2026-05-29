@@ -85,6 +85,25 @@ Render works well for app services and deploy hooks, but Prometheus, Grafana, an
 - Add centralized logging with Fluent Bit, Elasticsearch, and Kibana
 - Create dashboards and alerts for key services
 
+### Monitoring Manifests
+
+The repository now includes a starter Kubernetes monitoring stack under `k8s/monitoring`.
+
+Deploy it with:
+
+```bash
+kubectl apply -k k8s/monitoring
+```
+
+That stack includes:
+
+- Prometheus
+- Grafana
+- SonarQube
+- PostgreSQL for SonarQube
+
+Update the scrape targets in `k8s/monitoring/prometheus-configmap.yaml` so they match the Kubernetes services for your backend and frontend once those app manifests are added.
+
 ### Phase 7: GitOps and Release Automation
 
 - Add ArgoCD for GitOps deployment
