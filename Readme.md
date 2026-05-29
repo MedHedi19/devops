@@ -1,21 +1,3 @@
-## React JS Frontend with Node JS Backend using MongoDB
-
-## View The Full React JS Tutorial Series Here:
-## https://www.youtube.com/playlist?list=PL7lXhMmy4JB5X38OT1JzXLmgP2hUM-v5f
-
-
-Make sure to set up your MongoDB with the table: react_db
-
-Make sure to update the /backend/.env file with your MongoDB DB_URI
-
-```javascript
-cd backend
-npm start
-
-cd frontend
-npm start
-```
-
 ## Run with Docker
 
 Build and start both services with:
@@ -55,6 +37,32 @@ To use the full pipeline, configure these Jenkins values:
 - `SONAR_HOST_URL` as a Jenkins environment variable
 - `ENABLE_IMAGE_PUSH=true` to publish images
 - `RENDER_DEPLOY_HOOK_BACKEND` and `RENDER_DEPLOY_HOOK_FRONTEND` if you want Render deploys
+- The Jenkins job now polls SCM every 5 minutes, so it can start automatically after pushes
+
+### SonarQube Setup
+
+To enable the SonarQube stage:
+
+- Create a SonarQube server in Jenkins with the URL in `SONAR_HOST_URL`
+- Add a Jenkins secret text credential named `sonar-token`
+- Make sure the SonarQube server is reachable from Jenkins
+- Keep the backend and frontend code quality gate enabled before publishing images
+
+### Prometheus and Grafana Setup
+
+The monitoring stack lives in `k8s/monitoring`.
+
+To use it:
+
+```bash
+kubectl apply -k k8s/monitoring
+```
+
+After deployment:
+
+- Open Grafana and add Prometheus as the data source
+- Import or build dashboards for backend, frontend, and cluster metrics
+- Expose the services through an ingress or port-forward for local access
 
 ### Important Deployment Note
 

@@ -6,6 +6,10 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     environment {
         BACKEND_DIR = 'backend'
         FRONTEND_DIR = 'frontend'
