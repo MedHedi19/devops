@@ -26,11 +26,13 @@ pipeline {
                 stage('Backend') {
                     steps {
                         dir("${BACKEND_DIR}") {
-                            script {
-                                docker.image('node:20-alpine').inside {
-                                    sh 'npm install --no-audit --no-fund'
-                                }
-                            }
+                            sh '''
+                                docker run --rm \
+                                  -v "$PWD":/app \
+                                  -w /app \
+                                  node:20-alpine \
+                                  sh -lc "npm install --no-audit --no-fund"
+                            '''
                         }
                     }
                 }
@@ -38,11 +40,13 @@ pipeline {
                 stage('Frontend') {
                     steps {
                         dir("${FRONTEND_DIR}") {
-                            script {
-                                docker.image('node:20-alpine').inside {
-                                    sh 'npm install --no-audit --no-fund'
-                                }
-                            }
+                            sh '''
+                                docker run --rm \
+                                  -v "$PWD":/app \
+                                  -w /app \
+                                  node:20-alpine \
+                                  sh -lc "npm install --no-audit --no-fund"
+                            '''
                         }
                     }
                 }
@@ -54,11 +58,13 @@ pipeline {
                 stage('Backend Syntax Check') {
                     steps {
                         dir("${BACKEND_DIR}") {
-                            script {
-                                docker.image('node:20-alpine').inside {
-                                    sh 'node --check index.js && node --check routes/router.js'
-                                }
-                            }
+                            sh '''
+                                docker run --rm \
+                                  -v "$PWD":/app \
+                                  -w /app \
+                                  node:20-alpine \
+                                  sh -lc "node --check index.js && node --check routes/router.js"
+                            '''
                         }
                     }
                 }
@@ -66,11 +72,13 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         dir("${FRONTEND_DIR}") {
-                            script {
-                                docker.image('node:20-alpine').inside {
-                                    sh 'CI=true npm test -- --watchAll=false --passWithNoTests'
-                                }
-                            }
+                            sh '''
+                                docker run --rm \
+                                  -v "$PWD":/app \
+                                  -w /app \
+                                  node:20-alpine \
+                                  sh -lc "CI=true npm test -- --watchAll=false --passWithNoTests"
+                            '''
                         }
                     }
                 }
