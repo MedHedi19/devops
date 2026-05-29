@@ -8,7 +8,7 @@
 
 ## CI
 
-- [ ] Add Jenkinsfile to the repository
+- [x] Add Jenkinsfile to the repository
 - [ ] Add lint stage for frontend and backend
 - [ ] Add unit test stage for frontend and backend
 - [ ] Add Docker build stage
