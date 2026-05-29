@@ -42,7 +42,22 @@ This project can be turned into a full CI/CD and observability pipeline in phase
 - Connect the repository to Jenkins
 - Run install, lint, and test stages on every push
 - Add build stages for frontend and backend images
-- Publish build artifacts and image tags
+- Publish Docker images to a real registry such as Docker Hub or GHCR
+- Optionally trigger Render deploy hooks after a successful image build
+
+### Jenkins Wiring Required
+
+To use the full pipeline, configure these Jenkins values:
+
+- `docker-registry-creds` for registry push credentials
+- `sonar-token` for SonarQube analysis
+- `SONAR_HOST_URL` as a Jenkins environment variable
+- `ENABLE_IMAGE_PUSH=true` to publish images
+- `RENDER_DEPLOY_HOOK_BACKEND` and `RENDER_DEPLOY_HOOK_FRONTEND` if you want Render deploys
+
+### Important Deployment Note
+
+Render works well for app services and deploy hooks, but Prometheus, Grafana, and SonarQube are usually better hosted on Kubernetes or a VM with persistent storage. If you want a production-grade stack, keep the application pipeline in Jenkins and deploy the monitoring stack separately.
 
 ### Phase 3: Code Quality with SonarQube
 
