@@ -26,7 +26,11 @@ pipeline {
                 stage('Backend') {
                     steps {
                         dir("${BACKEND_DIR}") {
-                            sh 'npm install --no-audit --no-fund'
+                            script {
+                                docker.image('node:20-alpine').inside {
+                                    sh 'npm install --no-audit --no-fund'
+                                }
+                            }
                         }
                     }
                 }
@@ -34,7 +38,11 @@ pipeline {
                 stage('Frontend') {
                     steps {
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm install --no-audit --no-fund'
+                            script {
+                                docker.image('node:20-alpine').inside {
+                                    sh 'npm install --no-audit --no-fund'
+                                }
+                            }
                         }
                     }
                 }
@@ -46,7 +54,11 @@ pipeline {
                 stage('Backend Syntax Check') {
                     steps {
                         dir("${BACKEND_DIR}") {
-                            sh 'node --check index.js && node --check routes/router.js'
+                            script {
+                                docker.image('node:20-alpine').inside {
+                                    sh 'node --check index.js && node --check routes/router.js'
+                                }
+                            }
                         }
                     }
                 }
@@ -54,7 +66,11 @@ pipeline {
                 stage('Frontend Tests') {
                     steps {
                         dir("${FRONTEND_DIR}") {
-                            sh 'CI=true npm test -- --watchAll=false --passWithNoTests'
+                            script {
+                                docker.image('node:20-alpine').inside {
+                                    sh 'CI=true npm test -- --watchAll=false --passWithNoTests'
+                                }
+                            }
                         }
                     }
                 }
