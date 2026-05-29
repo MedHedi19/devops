@@ -17,6 +17,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'devops'
         SONAR_HOST_URL = ''
         ENABLE_IMAGE_PUSH = 'false'
+        ENABLE_K8S_DEPLOY = 'false'
         RUN_TRIVY_SCAN = 'false'
     }
 
@@ -61,7 +62,7 @@ pipeline {
 
         stage('Validate Code') {
             parallel {
-                stage('Backend Syntax Check') {
+                stage('Backend Tests') {
                     steps {
                         dir("${BACKEND_DIR}") {
                             sh '''
@@ -69,7 +70,7 @@ pipeline {
                                   -v "$PWD":/app \
                                   -w /app \
                                   node:20-alpine \
-                                  sh -lc "node --check index.js && node --check routes/router.js"
+                                  sh -lc "CI=true npm test"
                             '''
                         }
                     }
@@ -164,8 +165,12 @@ pipeline {
                         echo "$DOCKER_PASSWORD" | docker login "$DOCKER_REGISTRY_URL" -u "$DOCKER_USERNAME" --password-stdin
                         docker tag react-backend:${BUILD_NUMBER} ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-backend:${BUILD_NUMBER}
                         docker tag react-frontend:${BUILD_NUMBER} ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-frontend:${BUILD_NUMBER}
+                        docker tag react-backend:${BUILD_NUMBER} ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-backend:latest
+                        docker tag react-frontend:${BUILD_NUMBER} ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-frontend:latest
                         docker push ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-backend:${BUILD_NUMBER}
                         docker push ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-frontend:${BUILD_NUMBER}
+                        docker push ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-backend:latest
+                        docker push ${DOCKER_REGISTRY_URL}/${REGISTRY_NAMESPACE}/react-frontend:latest
                     '''
                 }
             }
@@ -192,7 +197,7 @@ pipeline {
         stage('Deploy Kubernetes') {
             when {
                 expression {
-                    return fileExists('k8s/staging') || fileExists('k8s/production')
+                    return env.ENABLE_K8S_DEPLOY == 'true' && (fileExists('k8s/staging') || fileExists('k8s/production'))
                 }
             }
             steps {

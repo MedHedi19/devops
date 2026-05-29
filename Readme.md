@@ -41,6 +41,7 @@ This project can be turned into a full CI/CD and observability pipeline in phase
 
 - Connect the repository to Jenkins
 - Run install, lint, and test stages on every push
+- Run backend Jest tests in Jenkins, just like the frontend test stage
 - Add build stages for frontend and backend images
 - Publish Docker images to a real registry such as Docker Hub or GHCR
 - Optionally trigger Render deploy hooks after a successful image build
@@ -77,6 +78,20 @@ Render works well for app services and deploy hooks, but Prometheus, Grafana, an
 - Deploy frontend, backend, and MongoDB to the cluster
 - Add Ingress for external traffic
 - Separate staging and production namespaces
+
+### App Load Balancing
+
+The repository now includes a starter app stack under `k8s/staging`.
+
+It exposes the backend and frontend through Kubernetes `LoadBalancer` services and runs two replicas for each service so traffic can be balanced across pods.
+
+Deploy it with:
+
+```bash
+kubectl apply -k k8s/staging
+```
+
+The image names are currently set to `docker.io/medhedi19/react-backend:latest` and `docker.io/medhedi19/react-frontend:latest`, so enable the Jenkins image push stage before expecting the cluster deploy to pull them from Docker Hub.
 
 ### Phase 6: Monitoring and Logging
 
