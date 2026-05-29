@@ -26,7 +26,7 @@ pipeline {
                 stage('Backend') {
                     steps {
                         dir("${BACKEND_DIR}") {
-                            sh 'npm ci'
+                            sh 'npm install --no-audit --no-fund'
                         }
                     }
                 }
@@ -34,7 +34,7 @@ pipeline {
                 stage('Frontend') {
                     steps {
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm ci'
+                            sh 'npm install --no-audit --no-fund'
                         }
                     }
                 }
