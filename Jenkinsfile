@@ -6,6 +6,10 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    parameters {
+        string(name: 'SONAR_HOST_URL', defaultValue: '', description: 'SonarQube server URL, for example http://localhost:9000')
+    }
+
     triggers {
         pollSCM('H/5 * * * *')
     }
@@ -19,7 +23,6 @@ pipeline {
         REGISTRY_NAMESPACE = 'medhedi19'
         DOCKER_REGISTRY_URL = 'docker.io'
         SONAR_PROJECT_KEY = 'devops'
-        SONAR_HOST_URL = ''
         ENABLE_IMAGE_PUSH = 'false'
         ENABLE_K8S_DEPLOY = 'false'
         RUN_TRIVY_SCAN = 'false'
@@ -99,26 +102,30 @@ pipeline {
         stage('SonarQube Analysis') {
             when {
                 allOf {
-                    expression { return env.SONAR_HOST_URL?.trim() }
+                    expression { return (params.SONAR_HOST_URL?.trim() ?: env.SONAR_HOST_URL)?.trim() }
                     expression { return fileExists('backend/package.json') }
                     expression { return fileExists('frontend/package.json') }
                 }
             }
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                        docker run --rm \
-                          -e SONAR_HOST_URL="$SONAR_HOST_URL" \
-                          -e SONAR_TOKEN="$SONAR_TOKEN" \
-                          -v "$PWD":/usr/src \
-                          -w /usr/src \
-                          sonarsource/sonar-scanner-cli:latest \
-                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                          -Dsonar.projectName=${SONAR_PROJECT_KEY} \
-                          -Dsonar.sources=backend,frontend \
-                          -Dsonar.exclusions=**/node_modules/**,**/build/**,**/coverage/** \
-                          -Dsonar.sourceEncoding=UTF-8
-                    '''
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                    script {
+                        def sonarHostUrl = (params.SONAR_HOST_URL?.trim() ?: env.SONAR_HOST_URL)?.trim()
+                        echo "Using Sonar host: ${sonarHostUrl}"
+                        sh """
+                            docker run --rm \
+                              -v \"$PWD\":/usr/src \
+                              -w /usr/src \
+                              sonarsource/sonar-scanner-cli:latest \
+                              -Dsonar.host.url='${sonarHostUrl}' \
+                              -Dsonar.login=\"${SONAR_TOKEN}\" \
+                              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                              -Dsonar.projectName=${SONAR_PROJECT_KEY} \
+                              -Dsonar.sources=backend,frontend \
+                              -Dsonar.exclusions=**/node_modules/**,**/build/**,**/coverage/** \
+                              -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
                 }
             }
         }
